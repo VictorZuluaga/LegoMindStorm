@@ -25,12 +25,23 @@ rotate_quarter = 18;
 
 #Espacio de funciones
 def move_ticks(right_m,left_m,speed,sense): #giro a izquierda sense = 1, giro a derecha sense = -1
-        mR.run_to_rel_pos(position_sp=-sense*(right_m), speed_sp=speed);
+        mR.run_to_rel_pos(position_sp=-sense*right_m, speed_sp=speed);
         mL.run_to_rel_pos(position_sp=sense*left_m, speed_sp=speed);
 
+def move_straight(cm,speed,sense): #marcha atras sense = -1, sense=1 hacia adelante
+        #1cm equivale a 10 ticks por rueda?
+        ticks = 10*2*cm;
+        sense_aux = sense*2
+        mR.run_to_rel_pos(position_sp=sense*ticks, speed_sp=speed);
+        mL.run_to_rel_pos(position_sp=sense*ticks, speed_sp=speed);
+        mR.wait_while('running');
+        mL.wait_while('running');
+        #correction(cm,sense_aux);
+        reset_motors();
+
 def wait_for_both():
-        mR.wait_while('running', timeout=100);
-        mL.wait_while('running', timeout=100);
+        mR.wait_while('running',timeout=100);
+        mL.wait_while('running',timeout=100);
 
 def rotate(num,sense):
         global angle;
@@ -42,6 +53,7 @@ def rotate(num,sense):
                 wait_for_both();
                 correction(contador_depuracion,sense);
                 write_log_depuracion();
+        reset_motors();
 
 def write_log_depuracion():
         global contador_depuracion;
@@ -93,6 +105,7 @@ def rotate_no_log(sense,top):
         if(top==18): #significa que estoy rotando un cuarto
                 move_ticks(2,2,normal_speed-70,sense);
                 wait_for_both();
+        reset_motors();
 
 def reset_motors():
         global contador_depuracion;
@@ -105,18 +118,18 @@ def reset_motors():
 
 
 
-reset_motors();
-rotate(69,-1);
-reset_motors();
-rotate(69,1);
-reset_motors();
-rotate_no_log(-1,rotate_half);
-reset_motors();
-rotate_no_log(1,rotate_half);
-reset_motors();
-rotate_no_log(-1,rotate_quarter);
-reset_motors();
-rotate_no_log(1,rotate_quarter);
+reset_motors(); #reset inicial para evitar errores al tocar los motores
+
+
+#rotate(69,-1);
+#rotate(69,1);
+#rotate_no_log(-1,rotate_half);
+#rotate_no_log(1,rotate_half);
+#rotate_no_log(-1,rotate_quarter);
+#rotate_no_log(1,rotate_quarter);
+move_straight(30,100,1);
+move_straight(30,100,-1);
+
 
 
 log_depuracion.close();
