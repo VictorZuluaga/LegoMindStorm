@@ -20,6 +20,8 @@ log_sensor = open("log_sensor.txt", "w");
 angle = 10;
 correction_speed = 25;
 normal_speed = 100;
+rotate_half = 35;
+rotate_quarter = 18;
 
 #Espacio de funciones
 def move_ticks(right_m,left_m,speed,sense): #giro a izquierda sense = 1, giro a derecha sense = -1
@@ -56,7 +58,7 @@ def write_log_sensor():
 
 def measure():
         global us;
-        time.sleep(0.1);
+        #time.sleep(0.1);
         distance = us.value();
         return distance/10;
 
@@ -77,15 +79,20 @@ def correction(iter,sense):
                 error_right = iter*angle - right_pos;
                 error_left = iter*angle - left_pos;
 
-def rotate_half(sense):
+def rotate_no_log(sense,top):
         global normal_speed;
         global angle;
-        for x in range(1,35):
-                move_ticks(angle,angle,normal_speed-50,sense);
+        for x in range(1,top):
+                move_ticks(angle,angle,normal_speed,sense);
                 wait_for_both();
                 correction(x,sense);
-        move_ticks(angle/2,angle/2,normal_speed-70,sense);
-        wait_for_both();
+
+        if(top==35): #significa que estoy rotando media vuelta
+                move_ticks(angle/2,angle/2,normal_speed-70,sense);
+                wait_for_both();
+        if(top==18): #significa que estoy rotando un cuarto
+                move_ticks(2,2,normal_speed-70,sense);
+                wait_for_both();
 
 def reset_motors():
         global contador_depuracion;
@@ -94,7 +101,7 @@ def reset_motors():
         mL.reset();
         contador_depuracion = 1;
         contador_sensor = 1;
-        time.sleep(0.3);
+        time.sleep(2);
 
 
 
@@ -103,9 +110,14 @@ rotate(69,-1);
 reset_motors();
 rotate(69,1);
 reset_motors();
-rotate_half(1);
+rotate_no_log(-1,rotate_half);
 reset_motors();
-rotate_half(-1);
+rotate_no_log(1,rotate_half);
+reset_motors();
+rotate_no_log(-1,rotate_quarter);
+reset_motors();
+rotate_no_log(1,rotate_quarter);
+
 
 log_depuracion.close();
 log_sensor.close();
